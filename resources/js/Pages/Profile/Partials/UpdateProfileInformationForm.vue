@@ -99,7 +99,7 @@ const clearPhotoFileInput = () => {
                     @change="updatePhotoPreview"
                 />
 
-                <InputLabel for="photo" value="Photo" />
+                <InputLabel for="photo" value="Foto de perfil" />
 
                 <!-- Current Profile Photo -->
                 <div v-show="!photoPreview" class="mt-2">
@@ -142,7 +142,7 @@ const clearPhotoFileInput = () => {
 
             <!-- Name -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="name" value="Name" />
+                <InputLabel for="name">Nombre</InputLabel>
                 <InputText
                     id="name"
                     v-model="form.name"

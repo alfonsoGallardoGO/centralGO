@@ -27,7 +27,7 @@ const confirmationForm = useForm({
 });
 
 const twoFactorEnabled = computed(
-    () => !enabling.value && page.props.auth.user?.two_factor_enabled
+    () => !enabling.value && page.props.auth.user?.two_factor_enabled,
 );
 
 watch(twoFactorEnabled, () => {
@@ -55,7 +55,7 @@ const enableTwoFactorAuthentication = () => {
                 enabling.value = false;
                 confirming.value = props.requiresConfirmation;
             },
-        }
+        },
     );
 };
 
@@ -121,19 +121,19 @@ const disableTwoFactorAuthentication = () => {
         <template #content>
             <h3
                 v-if="twoFactorEnabled && !confirming"
-                class="text-lg font-medium text-gray-900"
+                class="text-lg font-medium"
             >
                 Has habilitado la autenticación de dos factores.
             </h3>
 
             <h3
                 v-else-if="twoFactorEnabled && confirming"
-                class="text-lg font-medium text-gray-900"
+                class="text-lg font-medium"
             >
                 Finaliza la habilitación de la autenticación de dos factores.
             </h3>
 
-            <h3 v-else class="text-lg font-medium text-gray-900">
+            <h3 v-else class="text-lg font-medium">
                 No has habilitado la autenticación de dos factores.
             </h3>
 

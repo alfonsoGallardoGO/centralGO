@@ -6,6 +6,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RestletController;
 use App\Http\Controllers\AccountingAccountController;
 use App\Http\Controllers\ClaseController;
+use App\Http\Controllers\PortalController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,9 +25,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('/dashboard');
+    Route::get('/dashboard', [PortalController::class, 'indexDashboard'])->name('/dashboard');
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
@@ -64,6 +63,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::delete('catalogo/clases/{clase}', [ClaseController::class, 'destroy'])->name('catalogo.clases.destroy');
     Route::post('catalogo/clases/multiple', [ClaseController::class, 'destroyMultiple'])
     ->name('catalogo.clases.destroyMultiple');
+
+    Route::get('catalogo/portales', [PortalController::class, 'index'])->name('/catalogo/portales');
+    Route::post('catalogo/portales/store', [PortalController::class, 'store'])->name('catalogo.portales.store');
+    Route::put('catalogo/portales/{portal}', [PortalController::class, 'update'])->name('catalogo.portales.update');
+    Route::delete('catalogo/portales/{portal}', [PortalController::class, 'destroy'])->name('catalogo.portales.destroy');
+    Route::post('catalogo/portales/multiple', [PortalController::class, 'destroyMultiple'])
+    ->name('catalogo.portales.destroyMultiple');
 
 });
 

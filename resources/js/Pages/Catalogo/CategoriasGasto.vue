@@ -173,7 +173,7 @@ const error = (error) => {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :title="'Categorías de Gasto'">
         <div class="card dark:border-none">
             <Toolbar class="mb-6">
                 <template #start>

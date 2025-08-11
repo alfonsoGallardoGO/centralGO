@@ -22,11 +22,8 @@ const confirmUserDeletion = () => {
 };
 
 const deleteUser = () => {
-    form.delete(route("current-user.destroy"), {
-        preserveScroll: true,
-        onSuccess: () => closeModal(),
-        onError: () => passwordInput.value.focus(),
-        onFinish: () => form.reset(),
+    form.post(route("logout"), {
+        onFinish: () => closeModal(),
     });
 };
 
@@ -39,51 +36,28 @@ const closeModal = () => {
 
 <template>
     <ActionSection>
-        <template #title> Eliminar Cuenta </template>
+        <template #title> Cerrar Sesion </template>
 
-        <template #description> Elimina permanentemente tu cuenta. </template>
+        <template #description> Cerrar sesión de este dispositivo. </template>
 
         <template #content>
             <div class="max-w-xl text-sm text-gray-600">
-                Una vez que tu cuenta sea eliminada, todos sus recursos y datos
-                serán eliminados permanentemente. Antes de eliminar tu cuenta,
-                por favor descarga cualquier dato o información que desees
-                conservar.
+                Se cerrará la sesión de este dispositivo.
             </div>
 
             <div class="mt-5">
                 <DangerButton @click="confirmUserDeletion">
-                    Eliminar Cuenta
+                    Cerrar Sesion
                 </DangerButton>
             </div>
 
             <!-- Delete Account Confirmation Modal -->
             <DialogModal :show="confirmingUserDeletion" @close="closeModal">
-                <template #title> Eliminar Cuenta </template>
+                <template #title> Cerrar Sesion </template>
 
                 <template #content>
-                    ¿Estás seguro de que deseas eliminar tu cuenta? Una vez que
-                    tu cuenta sea eliminada, todos sus recursos y datos serán
-                    eliminados permanentemente. Por favor, ingresa tu contraseña
-                    para confirmar que deseas eliminar tu cuenta de forma
-                    permanente.
-
-                    <div class="mt-4">
-                        <TextInput
-                            ref="passwordInput"
-                            v-model="form.password"
-                            type="password"
-                            class="mt-1 block w-3/4"
-                            placeholder="Password"
-                            autocomplete="current-password"
-                            @keyup.enter="deleteUser"
-                        />
-
-                        <InputError
-                            :message="form.errors.password"
-                            class="mt-2"
-                        />
-                    </div>
+                    ¿Estás seguro de que deseas cerrar sesión en este
+                    dispositivo?
                 </template>
 
                 <template #footer>
@@ -97,7 +71,7 @@ const closeModal = () => {
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
-                        Eliminar Cuenta
+                        Cerrar Sesion
                     </DangerButton>
                 </template>
             </DialogModal>

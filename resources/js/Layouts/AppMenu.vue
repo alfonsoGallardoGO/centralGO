@@ -46,9 +46,17 @@ const model = ref([
                         icon: "pi pi-folder-open",
                         to: "/catalogo/clases",
                     },
+                    {
+                        label: "Portales",
+                        icon: "pi pi-desktop",
+                        to: "/catalogo/portales",
+                    },
                 ],
             },
         ],
+    },
+    {
+        label: "Portales",
     },
 ]);
 </script>
@@ -63,6 +71,14 @@ const model = ref([
             ></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
+        <a
+            class="layout-menuitem-text"
+            target="_blank"
+            href="https://nominas.grupo-ortiz.site/"
+        >
+            <i class="pi pi-address-book mr-2"></i>
+            <span class="layout-menuitem-text">Nominas</span>
+        </a>
     </ul>
 </template>
 

@@ -3,7 +3,7 @@ import AppMenu from "./AppMenu.vue";
 </script>
 
 <template>
-    <div class="layout-sidebar text-lg">
+    <div class="layout-sidebar text-lg shadow">
         <app-menu></app-menu>
     </div>
 </template>

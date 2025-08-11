@@ -174,7 +174,7 @@ const error = (error) => {
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :title="'Ubicaciones'">
         <div class="card dark:border-none">
             <Toolbar class="mb-6">
                 <template #start>

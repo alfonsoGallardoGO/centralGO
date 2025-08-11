@@ -18,7 +18,7 @@ const hasActions = computed(() => !!useSlots().actions);
             </template>
         </SectionTitle>
 
-        <div class="mt-5 md:mt-0 md:col-span-2 card shadow">
+        <div class="mt-5 md:mt-0 md:col-span-2 card border-none shadow">
             <form @submit.prevent="$emit('submitted')">
                 <div
                     class="px-4 py-5 sm:p-6"

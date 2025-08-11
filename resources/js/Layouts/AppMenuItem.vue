@@ -75,9 +75,6 @@ function itemClick(event, item) {
 }
 
 function checkActiveRoute(item) {
-    // ⬅️ Cambia 'route.path' por 'route().current()' o 'route().current(item.to)'
-    // Depende de tu implementación de Laravel y la librería ziggy
-    // Por ahora, 'item.to' podría funcionar si las rutas de Inertia y las de Vue Router coinciden
     return route().current(item.to);
 }
 </script>
