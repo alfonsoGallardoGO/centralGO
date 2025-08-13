@@ -6,8 +6,10 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RestletController;
 use App\Http\Controllers\AccountingAccountController;
 use App\Http\Controllers\ClaseController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\VistaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -79,6 +81,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/seguridad/roles', [RoleController::class, 'store'])->name('seguridad.roles.store');
     Route::put('/seguridad/roles/{id}/permissions', [RoleController::class, 'updateRolePermissions'])->name('seguridad.roles.updatePermissions');
     Route::delete('/seguridad/roles/{id}', [RoleController::class, 'destroy'])->name('seguridad.roles.destroy');
+
+    Route::get('/seguridad/permisos', [PermissionController::class, 'index'])->name('/seguridad/permisos');
+    Route::post('/seguridad/permisos', [PermissionController::class, 'store'])->name('seguridad.permisos.store');
+    Route::put('/seguridad/permisos/{id}', [PermissionController::class, 'update'])->name('seguridad.permisos.update');
+    Route::delete('/seguridad/permisos/{id}', [PermissionController::class, 'destroy'])->name('seguridad.permisos.destroy');
+
+    Route::get('/seguridad/vistas', [VistaController::class, 'index'])->name('/seguridad/vistas');
+
 });
 
 Route::get('/netsuite/restlet/{scriptId}/{deployId}', [RestletController::class, 'getRestletResponse']);

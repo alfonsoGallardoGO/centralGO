@@ -72,6 +72,11 @@ const model = ref([
                         icon: "pi pi-lock",
                         to: "/seguridad/permisos",
                     },
+                    {
+                        label: "Vistas",
+                        icon: "pi pi-eye",
+                        to: "/seguridad/vistas",
+                    },
                 ],
             },
         ],

@@ -6,24 +6,21 @@ import { ref } from "vue";
 import { useToast } from "primevue";
 
 const props = defineProps({
-    roles: Array,
     permissions: Array,
 });
 
 const toast = useToast();
 
-console.log(props.roles);
+console.log(props.permissions);
 
-const role = useForm({
+const permission = useForm({
     id: null,
     name: "",
-    permissions: props.permissions.map((permission) => permission.name),
+    guard_name: "web",
 });
 
-console.log(role);
-
-const roleDialog = ref(false);
-const deleteRoleDialog = ref(false);
+const permissionDialog = ref(false);
+const deletePermissionDialog = ref(false);
 const submitted = ref(false);
 
 const filters = ref({
@@ -31,45 +28,35 @@ const filters = ref({
 });
 
 const openNew = () => {
-    role.reset();
-    roleDialog.value = true;
+    permission.reset();
+    permissionDialog.value = true;
 };
 
 const hideDialog = () => {
-    roleDialog.value = false;
+    permissionDialog.value = false;
 };
 
-const editRole = (roleData) => {
-    console.log(roleData);
-    role.id = roleData.id;
-    role.name = roleData.name;
-    role.permissions = roleData.permissions.reduce((acc, permission) => {
-        acc[permission.name] = true;
-        return acc;
-    }, {});
+const editPermission = (permissionData) => {
+    console.log(permissionData);
+    permission.id = permissionData.id;
+    permission.name = permissionData.name;
 
     //console.log(role);
-    roleDialog.value = true;
+    permissionDialog.value = true;
 };
 
-const saveRole = () => {
+const savePermission = () => {
     submitted.value = true;
-    const selectedPermissions = Object.keys(role.permissions).filter(
-        (key) => role.permissions[key],
-    );
-    if (role.id) {
+    if (permission.id) {
         //console.log("Editing role", selectedPermissions);
-        role.transform((data) => ({
-            ...data,
-            permissions: selectedPermissions,
-        })).put(route("seguridad.roles.updatePermissions", role.id), {
+        permission.put(route("seguridad.permisos.update", permission.id), {
             onSuccess: () => {
                 hideDialog();
                 submitted.value = false;
                 toast.add({
                     severity: "success",
                     summary: "Success",
-                    detail: "Rol editado correctamente",
+                    detail: "Permiso editado correctamente",
                     life: 3000,
                 });
             },
@@ -78,18 +65,16 @@ const saveRole = () => {
                 toast.add({
                     severity: "error",
                     summary: "Error",
-                    detail: "Error al editar el rol",
+                    detail: "Error al editar el permiso",
                     life: 3000,
                 });
             },
         });
     } else {
-        role.transform((data) => ({
-            ...data,
-            permissions: selectedPermissions,
-        })).post(route("seguridad.roles.store"), {
+        permission.post(route("seguridad.permisos.store"), {
             onSuccess: () => {
                 hideDialog();
+                submitted.value = false;
                 toast.add({
                     severity: "success",
                     summary: "Success",
@@ -97,7 +82,6 @@ const saveRole = () => {
                     life: 3000,
                 });
                 role.reset();
-                submitted.value = false;
             },
             onError: () => {
                 submitted.value = false;
@@ -112,31 +96,31 @@ const saveRole = () => {
     }
 };
 
-const confirmDeleteRole = (roleData) => {
-    role.name = roleData.name;
-    role.id = roleData.id;
-    deleteRoleDialog.value = true;
+const confirmDeletePermission = (permissionData) => {
+    permission.name = permissionData.name;
+    permission.id = permissionData.id;
+    deletePermissionDialog.value = true;
 };
 
-const deleteRole = () => {
+const deletePermission = () => {
     submitted.value = true;
-    role.delete(route("seguridad.roles.destroy", role.id), {
+    permission.delete(route("seguridad.permisos.destroy", permission.id), {
         onSuccess: () => {
-            deleteRoleDialog.value = false;
+            deletePermissionDialog.value = false;
             toast.add({
                 severity: "success",
                 summary: "Success",
-                detail: "Rol eliminado correctamente",
+                detail: "Permiso eliminado correctamente",
                 life: 3000,
             });
             submitted.value = false;
         },
         onError: () => {
-            deleteRoleDialog.value = false;
+            deletePermissionDialog.value = false;
             toast.add({
                 severity: "error",
                 summary: "Error",
-                detail: "Error al eliminar el rol",
+                detail: "Error al eliminar el permiso",
                 life: 3000,
             });
             submitted.value = false;
@@ -159,12 +143,12 @@ const formatDateTimeUTC = (dateString) => {
 </script>
 
 <template>
-    <AppLayout :title="'Roles'">
+    <AppLayout :title="'Permisos'">
         <div class="card border-none">
             <Toolbar class="">
                 <template #start>
                     <Button
-                        label="Añadir rol"
+                        label="Añadir permiso"
                         icon="pi pi-plus"
                         class="mr-2"
                         @click="openNew"
@@ -173,21 +157,21 @@ const formatDateTimeUTC = (dateString) => {
             </Toolbar>
             <DataTable
                 ref="dt"
-                :value="props.roles"
+                :value="props.permissions"
                 dataKey="id"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} roles"
+                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} permisos"
                 class="rounded mt-0"
             >
                 <template #header>
                     <div
                         class="flex flex-wrap gap-2 items-center justify-between"
                     >
-                        <h4 class="m-0">Roles</h4>
+                        <h4 class="m-0">Permisos</h4>
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -201,7 +185,7 @@ const formatDateTimeUTC = (dateString) => {
                 </template>
                 <Column
                     field="name"
-                    header="Rol"
+                    header="Permiso"
                     sortable
                     style="min-width: 5rem"
                     class="px-20"
@@ -239,64 +223,43 @@ const formatDateTimeUTC = (dateString) => {
                             variant="outlined"
                             rounded
                             class="mr-2"
-                            @click="editRole(slotProps.data)"
+                            @click="editPermission(slotProps.data)"
                         />
                         <Button
                             icon="pi pi-trash"
                             variant="outlined"
                             rounded
                             severity="danger"
-                            @click="confirmDeleteRole(slotProps.data)"
+                            @click="confirmDeletePermission(slotProps.data)"
                         />
                     </template>
                 </Column>
             </DataTable>
 
             <Dialog
-                v-model:visible="roleDialog"
+                v-model:visible="permissionDialog"
                 :style="{ width: '450px' }"
-                header="Añadir o editar rol"
+                header="Añadir o editar permiso"
                 :modal="true"
             >
                 <div class="flex flex-col gap-6">
                     <div>
                         <label for="name" class="block font-bold mb-3"
-                            >Rol</label
+                            >Permiso</label
                         >
                         <InputText
                             id="name"
-                            v-model.trim="role.name"
+                            v-model.trim="permission.name"
                             required="true"
                             autofocus
-                            :invalid="submitted && !role.name"
+                            :invalid="submitted && !permission.name"
                             fluid
                         />
                         <small
-                            v-if="submitted && !role.name"
+                            v-if="submitted && !permission.name"
                             class="text-red-500"
-                            >El rol es requerido.</small
+                            >El permiso es requerido.</small
                         >
-                    </div>
-                    <div
-                        class="card border-none text-gray-600 dark:text-white flex flex-wrap justify-center gap-4"
-                    >
-                        <h4>Permisos</h4>
-                        <template
-                            v-for="(permission, index) in permissions"
-                            :key="index"
-                        >
-                            <div class="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    :name="permission.name"
-                                    :id="permission.name"
-                                    v-model="role.permissions[permission.name]"
-                                />
-                                <label :for="permission.name">{{
-                                    permission.name
-                                }}</label>
-                            </div>
-                        </template>
                     </div>
                 </div>
 
@@ -310,22 +273,22 @@ const formatDateTimeUTC = (dateString) => {
                     <Button
                         label="Guardar"
                         icon="pi pi-check"
-                        @click="saveRole"
+                        @click="savePermission"
                         :loading="submitted"
                     />
                 </template>
             </Dialog>
             <Dialog
-                v-model:visible="deleteRoleDialog"
+                v-model:visible="deletePermissionDialog"
                 :style="{ width: '450px' }"
                 header="Confirm"
                 :modal="true"
             >
                 <div class="flex items-center gap-4">
                     <i class="pi pi-exclamation-triangle !text-3xl" />
-                    <span v-if="role"
-                        >Estas seguro que deseas eliminar el rol
-                        <b>{{ role.name }}</b
+                    <span v-if="permission"
+                        >Estas seguro que deseas eliminar el permiso
+                        <b>{{ permission.name }}</b
                         >?</span
                     >
                 </div>
@@ -334,14 +297,14 @@ const formatDateTimeUTC = (dateString) => {
                         label="No"
                         icon="pi pi-times"
                         text
-                        @click="deleteRoleDialog = false"
+                        @click="deletePermissionDialog = false"
                         severity="secondary"
                         variant="text"
                     />
                     <Button
                         label="Yes"
                         icon="pi pi-check"
-                        @click="deleteRole"
+                        @click="deletePermission"
                         severity="danger"
                         :loading="submitted"
                     />

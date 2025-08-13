@@ -4,18 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with(['permissions' => function ($query) {
+            $query->whereDate('created_at', '>=', '2025-08-12')
+                ->orderBy('created_at', 'desc');
+        }])->get();
 
-        //dd($roles);
+        $permisos = Permission::whereDate('created_at', '>=', '2025-08-12')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         return Inertia::render('Roles/Index', [
-            'roles' => $roles
+            'roles' => $roles,
+            'permissions' => $permisos
         ]);
     }
 
