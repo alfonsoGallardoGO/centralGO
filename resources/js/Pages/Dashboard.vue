@@ -6,7 +6,10 @@ import axios from "axios";
 const props = defineProps({
     portals: Array,
     users: Number,
+    user: Object,
 });
+
+console.log(props.user[0]);
 
 const currentTime = ref(new Date().toLocaleTimeString());
 const options = ref(["list", "grid"]);
@@ -56,10 +59,6 @@ onMounted(() => {
     intervalId = setInterval(() => {
         currentTime.value = new Date().toLocaleTimeString();
     }, 1000);
-
-    setTimeout(() => {
-        isLoading.value = false;
-    }, 2000);
 });
 
 onUnmounted(() => {
@@ -84,14 +83,8 @@ onUnmounted(() => {
                         <h2
                             class="text-sm text-gray-600 font-normal ml-5 mt-0 mb-0"
                         >
-                            Rol de usuario
+                            {{ props.user[0] }}
                         </h2>
-                        <h3
-                            class="text-sm text-gray-600 font-normal ml-5 mt-0 mb-0"
-                        >
-                            Ultimo acceso:
-                            {{ $page.props.auth.user?.last_access }}
-                        </h3>
                     </div>
                 </div>
             </div>
@@ -180,10 +173,14 @@ onUnmounted(() => {
                                         ></Skeleton>
                                     </template>
                                     <img
-                                        v-else
-                                        class="block xl:block mx-auto rounded w-full object-cover"
+                                        :class="{
+                                            hidden: isLoading,
+                                            block: !isLoading,
+                                        }"
+                                        class="xl:block mx-auto rounded w-full object-cover"
                                         :src="screenshot(item.url)"
                                         :alt="item.name"
+                                        @load="isLoading = false"
                                     />
                                     <div
                                         class="absolute rounded-border"

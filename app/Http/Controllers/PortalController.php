@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Portal;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class PortalController extends Controller
@@ -23,10 +24,12 @@ class PortalController extends Controller
     public function indexDashboard() {
         $portals = Portal::all();
         $users = User::all()->count();
+        $user = Auth::user()->getRoleNames();
 
         return Inertia::render('Dashboard', [
             'portals' => $portals,
-            'users' => $users
+            'users' => $users,
+            'user' => $user
         ]);
     }
 

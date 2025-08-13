@@ -7,6 +7,7 @@ use App\Http\Controllers\RestletController;
 use App\Http\Controllers\AccountingAccountController;
 use App\Http\Controllers\ClaseController;
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -71,6 +72,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('catalogo/portales/multiple', [PortalController::class, 'destroyMultiple'])
     ->name('catalogo.portales.destroyMultiple');
 
+});
+
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::get('/seguridad/roles', [RoleController::class, 'index'])->name('/seguridad/roles');
+    Route::post('/seguridad/roles', [RoleController::class, 'store'])->name('seguridad.roles.store');
+    Route::put('/seguridad/roles/{id}/permissions', [RoleController::class, 'updateRolePermissions'])->name('seguridad.roles.updatePermissions');
+    Route::delete('/seguridad/roles/{id}', [RoleController::class, 'destroy'])->name('seguridad.roles.destroy');
 });
 
 Route::get('/netsuite/restlet/{scriptId}/{deployId}', [RestletController::class, 'getRestletResponse']);

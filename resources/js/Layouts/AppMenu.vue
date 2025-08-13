@@ -53,6 +53,27 @@ const model = ref([
                     },
                 ],
             },
+            {
+                label: "Seguridad",
+                icon: "pi pi-fw pi-shield",
+                items: [
+                    {
+                        label: "Usuarios",
+                        icon: "pi pi-users",
+                        to: "/seguridad/usuarios",
+                    },
+                    {
+                        label: "Roles",
+                        icon: "pi pi-briefcase",
+                        to: "/seguridad/roles",
+                    },
+                    {
+                        label: "Permisos",
+                        icon: "pi pi-lock",
+                        to: "/seguridad/permisos",
+                    },
+                ],
+            },
         ],
     },
     {
