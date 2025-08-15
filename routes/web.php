@@ -55,7 +55,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('catalogo/ubicaciones/multiple', [LocationController::class, 'destroyMultiple'])
     ->name('catalogo.ubicaciones.destroyMultiple');
 
-    Route::get('catalogo/cuentas-contables', [AccountingAccountController::class, 'index'])->name('/catalogo/cuentas-contables');
+    Route::get('catalogo/cuentas-contables', [AccountingAccountController::class, 'index'])->name('/catalogo/cuentas-contables')->middleware('view.permission:view');
     Route::post('catalogo/cuentas-contables/store', [AccountingAccountController::class, 'store'])->name('catalogo.cuentas-contables.store');
     Route::put('catalogo/cuentas-contables/{accountingAccount}', [AccountingAccountController::class, 'update'])->name('catalogo.cuentas-contables.update');
     Route::delete('catalogo/cuentas-contables/{accountingAccount}', [AccountingAccountController::class, 'destroy'])->name('catalogo.cuentas-contables.destroy');
@@ -105,6 +105,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/seguridad/usuarios/{user}', [UsuariosController::class, 'edit'])->name('seguridad.usuarios.edit');
     Route::put('/seguridad/usuarios/{user}', [UsuariosController::class, 'update'])->name('seguridad.usuarios.update');
     Route::put('/seguridad/usuarios/{user}/permissions', [UsuariosController::class, 'updatePermissions'])->name('seguridad.usuarios.updatePermissions');
+    Route::put('/seguridad/usuarios/{user}/view-permissions', [UsuariosController::class, 'updateViewPermissionsForView'])->name('seguridad.usuarios.updateViewPermissionsForView');
 });
 
 Route::get('/netsuite/restlet/{scriptId}/{deployId}', [RestletController::class, 'getRestletResponse']);

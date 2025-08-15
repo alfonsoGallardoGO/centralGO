@@ -9,7 +9,10 @@ const props = defineProps({
     roles: Array,
     permisos: Array,
     permisosAll: Array,
+    groupedViews: Object,
 });
+
+console.log(props.groupedViews);
 
 const permissions = ref(props.permisos);
 const selectedRol = ref(props.rol[0]);
@@ -21,16 +24,15 @@ const updateRol = () => {
 };
 
 function updatePermissions() {
-    console.log(permissions.value);
-    const selectedPermissions = permissions.value
-        .filter((perm) => perm.checked)
-        .map((perm) => {
-            return {
-                id: perm.id,
-                name: perm.name,
-                revoked: !perm.checked,
-            };
-        });
+    const selectedPermissions = permissions.value.map((perm) => {
+        return {
+            id: perm.id,
+            name: perm.name,
+            revoked: perm.checked,
+            checked: perm.checked,
+        };
+    });
+    console.log(selectedPermissions);
     router.put(
         route("seguridad.usuarios.updatePermissions", props.user.id),
         {
@@ -45,14 +47,37 @@ function updatePermissions() {
     );
 }
 
+const permInverse = (perm) => {
+    return !perm;
+};
+
+const savePermView = (viewData) => {
+    // Solo actualiza la propiedad 'checked' de los permisos, manteniendo las demás propiedades intactas
+
+    console.log("Guardando permisos para la vista:", viewData);
+
+    router.put(
+        route("seguridad.usuarios.updateViewPermissionsForView", props.user.id),
+        {
+            view_name: viewData.route,
+            permissions: viewData.permissions,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                alert("Permisos del view actualizados");
+            },
+        },
+    );
+};
+
 onMounted(() => {
+    console.log(permissions.value);
     const rawPermissions = JSON.parse(JSON.stringify(props.permisos));
     permissions.value = rawPermissions.map((p) => ({
         ...p,
-        checked: !p.revoked, // si NO está revocado, va marcado
+        checked: p.revoked, // si NO está revocado, va marcado
     }));
-
-    console.log(permissions.value);
 });
 </script>
 <template>
@@ -131,86 +156,66 @@ onMounted(() => {
             </Accordion>
         </div>
 
-        <div class="mt-8 card">
-            <Splitter style="height: 300px">
-                <SplitterPanel
-                    class="flex items-center justify-center uppercase text-2xl"
-                    :size="25"
-                    :minSize="10"
-                >
-                    Administracion
-                </SplitterPanel>
-                <SplitterPanel
-                    class="flex items-center justify-center"
-                    :size="75"
-                >
-                    <div class="w-full h-full overflow-y-auto">
-                        <Accordion>
-                            <AccordionPanel value="0">
-                                <AccordionHeader>Editar rol</AccordionHeader>
-                                <AccordionContent>
-                                    <Select
-                                        v-model="props.rol[0]"
-                                        :options="props.roles"
-                                        optionLabel="name"
-                                        class="w-full"
-                                        placeholder="Seleccionar rol"
-                                        option-value="name"
-                                        filter
-                                    />
-                                    <Button
-                                        label="Guardar cambios"
-                                        class="mt-5 mb-5"
-                                        @click="updateRol"
-                                    ></Button>
-                                </AccordionContent>
-                            </AccordionPanel>
-                        </Accordion>
-                        <Accordion>
-                            <AccordionPanel value="0">
-                                <AccordionHeader>Editar rol</AccordionHeader>
-                                <AccordionContent>
-                                    <Select
-                                        v-model="props.rol[0]"
-                                        :options="props.roles"
-                                        optionLabel="name"
-                                        class="w-full"
-                                        placeholder="Seleccionar rol"
-                                        option-value="name"
-                                        filter
-                                    />
-                                    <Button
-                                        label="Guardar cambios"
-                                        class="mt-5 mb-5"
-                                        @click="updateRol"
-                                    ></Button>
-                                </AccordionContent>
-                            </AccordionPanel>
-                        </Accordion>
-                        <Accordion>
-                            <AccordionPanel value="0">
-                                <AccordionHeader>Editar rol</AccordionHeader>
-                                <AccordionContent>
-                                    <Select
-                                        v-model="props.rol[0]"
-                                        :options="props.roles"
-                                        optionLabel="name"
-                                        class="w-full"
-                                        placeholder="Seleccionar rol"
-                                        option-value="name"
-                                        filter
-                                    />
-                                    <Button
-                                        label="Guardar cambios"
-                                        class="mt-5 mb-5"
-                                        @click="updateRol"
-                                    ></Button>
-                                </AccordionContent>
-                            </AccordionPanel>
-                        </Accordion>
-                    </div>
-                </SplitterPanel>
-            </Splitter>
-        </div>
+        <template
+            v-for="moduleView in props.groupedViews"
+            :key="moduleView[0].module"
+        >
+            <div class="mt-8 card border-none">
+                <Accordion>
+                    <AccordionPanel value="0">
+                        <AccordionHeader>{{
+                            moduleView[0].module
+                        }}</AccordionHeader>
+                        <AccordionContent>
+                            <template v-for="view in moduleView" :key="view.id">
+                                <Accordion>
+                                    <AccordionPanel value="0">
+                                        <AccordionHeader
+                                            >{{ view.name }} /
+                                            {{ view.route }}</AccordionHeader
+                                        >
+                                        <AccordionContent>
+                                            <template
+                                                v-for="permisos in view.permissions"
+                                            >
+                                                <div
+                                                    class="flex flex-row items-center gap-2"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        class="rounded-sm border-gray-400 checked:rounded-sm checked:border-gray-600"
+                                                        :name="permisos.name"
+                                                        :id="permisos.name"
+                                                        :value="permisos.name"
+                                                        v-model="
+                                                            permisos.revoked
+                                                        "
+                                                        :checked="
+                                                            permisos.revoked
+                                                        "
+                                                    />
+                                                    <label
+                                                        :for="permisos.name"
+                                                        >{{
+                                                            permisos.name
+                                                        }}</label
+                                                    >
+                                                </div>
+                                            </template>
+                                            <Button
+                                                class="mt-5"
+                                                label="Guardar permisos"
+                                                @click="savePermView(view)"
+                                            >
+                                            </Button>
+                                        </AccordionContent>
+                                    </AccordionPanel>
+                                </Accordion>
+                            </template>
+                        </AccordionContent>
+                    </AccordionPanel>
+                </Accordion>
+            </div>
+        </template>
     </AppLayout>
 </template>

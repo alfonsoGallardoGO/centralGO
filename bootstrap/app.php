@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+
+        ]);
+
+        $middleware->alias([
+            'view.permission' => \App\Http\Middleware\EnsureEffectivePermission::class,
         ]);
 
         //

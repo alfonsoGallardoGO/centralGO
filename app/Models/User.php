@@ -104,4 +104,19 @@ class User extends Authenticatable
                 ->delete();
         }
     }
+
+    public function hasRevokedViewPermission(string $viewName, string $permissionName): bool
+    {
+        $permission = Permission::where('name', $permissionName)->first();
+
+        if (! $permission) {
+            return false; // No existe ese permiso en Spatie
+        }
+
+        return UserRevokedViewPermission::where('user_id', $this->id)
+            ->where('view_name', $viewName)
+            ->where('permission_id', $permission->id)
+            ->exists();
+    }
+
 }
