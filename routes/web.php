@@ -6,9 +6,11 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RestletController;
 use App\Http\Controllers\AccountingAccountController;
 use App\Http\Controllers\ClaseController;
+use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\VistaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -88,7 +90,21 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::delete('/seguridad/permisos/{id}', [PermissionController::class, 'destroy'])->name('seguridad.permisos.destroy');
 
     Route::get('/seguridad/vistas', [VistaController::class, 'index'])->name('/seguridad/vistas');
+    Route::post('/seguridad/vistas', [VistaController::class, 'store'])->name('seguridad.vistas.store');
+    Route::put('/seguridad/vistas/{id}', [VistaController::class, 'update'])->name('seguridad.vistas.update');
+    Route::delete('/seguridad/vistas/{id}', [VistaController::class, 'destroy'])->name('seguridad.vistas.destroy');
+    Route::post('/seguridad/vistas/multiple', [VistaController::class, 'destroyMultiple'])->name('seguridad.vistas.destroyMultiple');
 
+    Route::get('/seguridad/modulos', [ModuloController::class, 'index'])->name('/seguridad/modulos');
+    Route::post('/seguridad/modulos', [ModuloController::class, 'store'])->name('seguridad.modulos.store');
+    Route::put('/seguridad/modulos/{modulo}', [ModuloController::class, 'update'])->name('seguridad.modulos.update');
+    Route::delete('/seguridad/modulos/{modulo}', [ModuloController::class, 'destroy'])->name('seguridad.modulos.destroy');
+    Route::post('/seguridad/modulos/multiple', [ModuloController::class, 'destroyMultiple'])->name('seguridad.modulos.destroyMultiple');
+
+    Route::get('/seguridad/usuarios', [UsuariosController::class, 'index'])->name('/seguridad/usuarios');
+    Route::get('/seguridad/usuarios/{user}', [UsuariosController::class, 'edit'])->name('seguridad.usuarios.edit');
+    Route::put('/seguridad/usuarios/{user}', [UsuariosController::class, 'update'])->name('seguridad.usuarios.update');
+    Route::put('/seguridad/usuarios/{user}/permissions', [UsuariosController::class, 'updatePermissions'])->name('seguridad.usuarios.updatePermissions');
 });
 
 Route::get('/netsuite/restlet/{scriptId}/{deployId}', [RestletController::class, 'getRestletResponse']);

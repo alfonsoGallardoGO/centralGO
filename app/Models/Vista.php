@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vista extends Model
 {
+    use HasFactory, SoftDeletes;
+
     protected $table = 'system_views';
 
     protected $fillable = [
         'name',
         'modulo',
-        'created_at',
-        'updated_at',
+        'url'
     ];
 }

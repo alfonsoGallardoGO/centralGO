@@ -28,7 +28,13 @@ class ModuloController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:modulos,name',
+        ]);
+
+        Modulo::create($validated);
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Modulo creado con éxito.');
     }
 
     /**
@@ -52,7 +58,13 @@ class ModuloController extends Controller
      */
     public function update(Request $request, Modulo $modulo)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:modulos,name,' . $modulo->id,
+        ]);
+
+        $modulo->update($validated);
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Modulo actualizado con éxito.');
     }
 
     /**
@@ -60,6 +72,20 @@ class ModuloController extends Controller
      */
     public function destroy(Modulo $modulo)
     {
-        //
+        $modulo->delete();
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Modulo eliminado con éxito.');
+    }
+
+    public function destroyMultiple(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:modulos,id',
+        ]);
+
+        Modulo::destroy($validated['ids']);
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Modulos eliminados con éxito.');
     }
 }

@@ -68,4 +68,40 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function hasPermissionToCustom($permissionName)
+    {
+        // Si el permiso está revocado explícitamente
+        $permission = Permission::where('name', $permissionName)->first();
+
+        if ($permission && UserRevokedPermission::where('user_id', $this->id)
+            ->where('permission_id', $permission->id)
+            ->exists()) {
+            return false;
+        }
+
+        // Caso normal: permisos por rol o usuario (Spatie)
+        return $this->hasPermissionTo($permissionName);
+    }
+
+    public function revokePermission($permissionName)
+    {
+        $permission = Permission::where('name', $permissionName)->first();
+        if ($permission) {
+            UserRevokedPermission::firstOrCreate([
+                'user_id' => $this->id,
+                'permission_id' => $permission->id
+            ]);
+        }
+    }
+
+    public function allowPermission($permissionName)
+    {
+        $permission = Permission::where('name', $permissionName)->first();
+        if ($permission) {
+            UserRevokedPermission::where('user_id', $this->id)
+                ->where('permission_id', $permission->id)
+                ->delete();
+        }
+    }
 }

@@ -35,7 +35,15 @@ class VistaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'url' => 'required|string|max:255',
+            'modulo' => 'required|string|max:255',
+        ]);
+
+        Vista::create($validated);
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Vista creada con éxito.');
     }
 
     /**
@@ -57,16 +65,33 @@ class VistaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Vista $vista)
+    public function update(Request $request, Vista $id)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'url' => 'required|string|max:255',
+            'modulo' => 'required|string|max:255',
+        ]);
+
+        $id->update($validated);
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Vista actualizada con éxito.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Vista $vista)
+    public function destroy(Vista $id)
     {
-        //
+        $id->delete();
+        return redirect()->route('/seguridad/vistas')->with('success', 'Vista eliminada con éxito.');
+    }
+
+    public function destroyMultiple(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        Vista::whereIn('id', $ids)->delete();
+
+        return redirect()->route('/seguridad/vistas')->with('success', 'Vistas eliminadas exitosamente.');
     }
 }
