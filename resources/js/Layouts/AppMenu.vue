@@ -1,7 +1,9 @@
 <script setup>
-import { ref } from "vue";
-
+import { ref, computed } from "vue";
+import { usePage } from "@inertiajs/vue3";
 import AppMenuItem from "./AppMenuItem.vue";
+
+const page = usePage();
 
 const model = ref([
     {
@@ -81,22 +83,43 @@ const model = ref([
             },
         ],
     },
-    {
-        label: "Portales",
-    },
+    { label: "Portales" },
 ]);
+
+// helper: ¿puede ver esa ruta?
+const canViews = computed(() => page.props.auth?.canViews ?? {});
+const canView = (to) => {
+    if (!to) return true; // headers/grupos sin ruta
+    const key = to.startsWith("/") ? to : `/${to}`;
+    return !!canViews.value[key];
+};
+
+// filtra recursivo el modelo
+const filteredModel = computed(() => {
+    const walk = (items) => {
+        return (items || [])
+            .map((i) => ({ ...i })) // clona
+            .map((i) => {
+                if (i.items) i.items = walk(i.items);
+                return i;
+            })
+            .filter((i) => {
+                if (i.to) return canView(i.to); // mantener si tiene permiso a la ruta
+                if (i.items?.length) return true; // mantener grupos con hijos visibles
+                return !i.to && !i.items; // headers sin hijos? decide si conservar o no
+            });
+    };
+    return walk(model.value);
+});
 </script>
 
 <template>
     <ul class="layout-menu">
-        <template v-for="(item, i) in model" :key="item">
-            <app-menu-item
-                v-if="!item.separator"
-                :item="item"
-                :index="i"
-            ></app-menu-item>
+        <template v-for="(item, i) in filteredModel" :key="i">
+            <app-menu-item :item="item" :index="i" />
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
+
         <a
             class="layout-menuitem-text"
             target="_blank"
@@ -107,5 +130,3 @@ const model = ref([
         </a>
     </ul>
 </template>
-
-<style lang="scss" scoped></style>

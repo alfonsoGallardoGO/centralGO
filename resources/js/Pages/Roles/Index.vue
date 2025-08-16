@@ -4,6 +4,7 @@ import { useForm } from "@inertiajs/vue3";
 import { FilterMatchMode } from "@primevue/core/api";
 import { ref } from "vue";
 import { useToast } from "primevue";
+import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     roles: Array,
@@ -11,6 +12,7 @@ const props = defineProps({
 });
 
 const toast = useToast();
+const page = usePage();
 
 console.log(props.roles);
 
@@ -161,13 +163,20 @@ const formatDateTimeUTC = (dateString) => {
 <template>
     <AppLayout :title="'Roles'">
         <div class="card border-none">
-            <Toolbar class="">
+            <Toolbar
+                class=""
+                v-if="
+                    page.props.auth?.can.includes('create') ||
+                    page.props.auth?.can.includes('delete')
+                "
+            >
                 <template #start>
                     <Button
                         label="Añadir rol"
                         icon="pi pi-plus"
                         class="mr-2"
                         @click="openNew"
+                        v-if="page.props.auth?.can.includes('create')"
                     />
                 </template>
             </Toolbar>
@@ -240,6 +249,7 @@ const formatDateTimeUTC = (dateString) => {
                             rounded
                             class="mr-2"
                             @click="editRole(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('update')"
                         />
                         <Button
                             icon="pi pi-trash"
@@ -247,6 +257,7 @@ const formatDateTimeUTC = (dateString) => {
                             rounded
                             severity="danger"
                             @click="confirmDeleteRole(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('delete')"
                         />
                     </template>
                 </Column>

@@ -14,7 +14,8 @@ const props = defineProps({
 
 console.log(props.groupedViews);
 
-const permissions = ref(props.permisos);
+const permissions = ref(props.permisosAll);
+console.log(props.permisos);
 const selectedRol = ref(props.rol[0]);
 
 const updateRol = () => {
@@ -171,7 +172,7 @@ onMounted(() => {
                                 <Accordion>
                                     <AccordionPanel value="0">
                                         <AccordionHeader
-                                            >{{ view.name }} /
+                                            >{{ view.name }}
                                             {{ view.route }}</AccordionHeader
                                         >
                                         <AccordionContent>

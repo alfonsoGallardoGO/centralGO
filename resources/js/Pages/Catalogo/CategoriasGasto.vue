@@ -5,11 +5,14 @@ import { FilterMatchMode } from "@primevue/core/api";
 import { InputText, useToast } from "primevue";
 import { ref } from "vue";
 import { router as Inertia } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     expenses: Array,
     errors: Object,
 });
+
+const page = usePage();
 
 console.log("Gastos props:", props.expenses);
 console.log("Gastos errors:", props.errors);
@@ -175,13 +178,20 @@ const error = (error) => {
 <template>
     <AppLayout :title="'Categorías de Gasto'">
         <div class="card dark:border-none">
-            <Toolbar class="mb-6">
+            <Toolbar
+                class="mb-6"
+                v-if="
+                    page.props.auth?.can.includes('create') &&
+                    page.props.auth?.can.includes('delete')
+                "
+            >
                 <template #start>
                     <Button
                         label="Añadir Categoría de Gasto"
                         icon="pi pi-plus"
                         class="mr-2"
                         @click="openNew"
+                        v-if="page.props.auth?.can.includes('create')"
                     />
                     <Button
                         label="Eliminar Seleccionados"
@@ -192,6 +202,7 @@ const error = (error) => {
                         :disabled="
                             !selectedExpenses || !selectedExpenses.length
                         "
+                        v-if="page.props.auth?.can.includes('delete')"
                     />
                 </template>
             </Toolbar>
@@ -272,6 +283,7 @@ const error = (error) => {
                             rounded
                             class="mr-2"
                             @click="editExpense(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('update')"
                         />
                         <Button
                             icon="pi pi-trash"
@@ -279,6 +291,7 @@ const error = (error) => {
                             rounded
                             severity="danger"
                             @click="confirmDeleteExpense(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('delete')"
                         />
                     </template>
                 </Column>

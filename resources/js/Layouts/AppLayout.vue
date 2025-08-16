@@ -1,14 +1,17 @@
 <script setup>
 import { useLayout } from "./composables/layout";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import AppFooter from "./AppFooter.vue";
 import AppSidebar from "./AppSidebar.vue";
 import AppTopbar from "./AppTopbar.vue";
 import { Head } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
 
 const outsideClickListener = ref(null);
+
+const page = usePage();
 
 const props = defineProps({
     title: String,
@@ -65,6 +68,13 @@ function isOutsideClicked(event) {
         topbarEl.contains(event.target)
     );
 }
+
+onMounted(() => {
+    console.log("URL actual:", page.url);
+    console.log("viewKey backend:", page.props.ctx?.viewKey);
+    console.log("Permisos (nombres):", page.props.auth?.can);
+    console.table((page.props.auth?.can ?? []).map((n) => ({ name: n })));
+});
 </script>
 
 <template>

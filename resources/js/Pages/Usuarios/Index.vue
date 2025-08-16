@@ -3,11 +3,14 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import { FilterMatchMode } from "@primevue/core/api";
 import { ref } from "vue";
 import { router } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     users: Array,
     roles: Array,
 });
+
+const page = usePage();
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -23,13 +26,20 @@ console.log(props.users, props.roles);
 <template>
     <AppLayout :title="'Usuarios'">
         <div class="card">
-            <Toolbar class="mb-6">
+            <Toolbar
+                class="mb-6"
+                v-if="
+                    page.props.auth?.can.includes('create') ||
+                    page.props.auth?.can.includes('delete')
+                "
+            >
                 <template #start>
                     <Button
                         label="Añadir usuario"
                         icon="pi pi-plus"
                         class="mr-2"
                         @click="openNew"
+                        v-if="page.props.auth?.can.includes('create')"
                     />
                 </template>
             </Toolbar>
@@ -95,6 +105,7 @@ console.log(props.users, props.roles);
                             rounded
                             class="mr-2"
                             @click="showUser(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('update')"
                         />
                     </template>
                 </Column>

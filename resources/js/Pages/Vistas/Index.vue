@@ -4,10 +4,13 @@ import { useForm } from "@inertiajs/vue3";
 import { FilterMatchMode } from "@primevue/core/api";
 import { ref } from "vue";
 import { router as Inertia } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
+
+const page = usePage();
 
 const props = defineProps({
     vistas: Array,
@@ -214,13 +217,22 @@ const deleteModulo = () => {
                 <TabPanels>
                     <!-- Vistas Tab -->
                     <TabPanel value="0">
-                        <Toolbar class="">
+                        <Toolbar
+                            class=""
+                            v-if="
+                                page.props.auth?.can.includes('create') ||
+                                page.props.auth?.can.includes('delete')
+                            "
+                        >
                             <template #start>
                                 <Button
                                     label="Nueva Vista"
                                     icon="pi pi-plus"
                                     class="mr-2"
                                     @click="openNew"
+                                    v-if="
+                                        page.props.auth?.can.includes('create')
+                                    "
                                 />
                                 <Button
                                     label="Eliminar Seleccionados"
@@ -230,6 +242,9 @@ const deleteModulo = () => {
                                     @click="confirmDeleteSelected"
                                     :disabled="
                                         !selectedViews || !selectedViews.length
+                                    "
+                                    v-if="
+                                        page.props.auth?.can.includes('delete')
                                     "
                                 />
                             </template>
@@ -305,6 +320,11 @@ const deleteModulo = () => {
                                         rounded
                                         class="mr-2"
                                         @click="editView(slotProps.data)"
+                                        v-if="
+                                            page.props.auth?.can.includes(
+                                                'update',
+                                            )
+                                        "
                                     />
                                     <Button
                                         icon="pi pi-trash"
@@ -313,6 +333,11 @@ const deleteModulo = () => {
                                         severity="danger"
                                         @click="
                                             confirmDeleteView(slotProps.data)
+                                        "
+                                        v-if="
+                                            page.props.auth?.can.includes(
+                                                'delete',
+                                            )
                                         "
                                     />
                                 </template>

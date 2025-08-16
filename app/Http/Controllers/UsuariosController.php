@@ -26,93 +26,102 @@ class UsuariosController extends Controller
 
     public function edit(User $user)
     {
+        $guard = config('auth.defaults.guard');
+        $desde = '2025-08-12';
 
-        //Permisos en general
-        $rol = $user->getRoleNames();
+        $rol   = $user->getRoleNames();
         $roles = Role::all();
-        $permsDesdeFecha = Permission::whereDate('created_at', '>=', '2025-08-12')->get();
 
-        $permIdsFromUserRoles = $user->getPermissionsViaRoles()->pluck('id')->all();
-        $permIdsCustomRevocados = UserRevokedPermission::where('user_id', $user->id)
-            ->pluck('permission_id')
-            ->toArray();
-        $idsMarcadosRevoked = array_unique(array_merge($permIdsFromUserRoles, $permIdsCustomRevocados));
-        $permisos = $permsDesdeFecha->map(function ($perm) use ($idsMarcadosRevoked) {
+        // Todos los permisos (del guard) desde la fecha
+        $permsDesdeFecha = Permission::whereDate('created_at', '>=', $desde)
+            ->orderBy('name')
+            ->get();
+
+        // 1) Permisos asignados (directos + por roles)
+        $assignedIds = $user->getAllPermissions()->pluck('id')->map('intval')->all();
+
+        // 2) Revocados globales
+        $revokedGlobalIds = UserRevokedPermission::where('user_id', $user->id)
+            ->pluck('permission_id')->map('intval')->all();
+
+        // --- PERMISOS GENERALES (no por vista) ---
+        // enabled = (asignado) && !revocadoGlobal
+        $permisos = $permsDesdeFecha->map(function ($perm) use ($assignedIds, $revokedGlobalIds) {
+            $enabled = in_array((int)$perm->id, $assignedIds, true)
+                && !in_array((int)$perm->id, $revokedGlobalIds, true);
+
             return [
                 'id'      => $perm->id,
                 'name'    => $perm->name,
-                'revoked' => in_array($perm->id, $idsMarcadosRevoked),
+                'enabled' => $enabled,
+                // si tu front aún espera 'revoked' como "habilitado" (invertiste semántica antes)
+                'revoked' => $enabled,
             ];
         });
 
+        // Si solo usas esto para catálogo sin estados, está bien;
+        // pero NO lo uses para pintar toggles porque no trae estados.
         $permisosAll = Permission::whereDate('created_at', '>=', '2025-08-12')
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-        //Permisos por vista
-        $views = Vista::orderBy('modulo') // primero por módulo
-            ->orderBy('name')             // luego por nombre
+            ->orderBy('created_at', 'desc')
             ->get();
-
-        $permIdsFromUserRoles = $user->getPermissionsViaRoles()->pluck('id')->all();
-
         
 
-        // 4) Revocados por vista (de tu tabla), agrupados por view_name => [permission_id,...]
-        $revokedViewPermissions = UserRevokedViewPermission::where('user_id', $user->id)
-            ->get(['view_name','permission_id'])
+        // --- PERMISOS POR VISTA ---
+        $views = Vista::orderBy('modulo')->orderBy('name')->get();
+
+        // Trae TODOS los revocados por vista y agrupa para evitar N+1
+        $revokedViewMap = UserRevokedViewPermission::where('user_id', $user->id)
+            ->get(['view_name', 'permission_id'])
             ->groupBy('view_name')
-            ->map(fn($group) => $group->pluck('permission_id')->all());
-        //dd($revokedViewPermissions);
+            ->map(fn ($group) => $group->pluck('permission_id')->map('intval')->all());
 
+        // Lista base de permisos (id, name) para mapear rápido
+        $basePermsArray = $permsDesdeFecha
+            ->map(fn ($p) => ['id' => (int)$p->id, 'name' => $p->name])
+            ->all();
 
-        // 5) Construimos la respuesta por vista
-        $basePermsArray = $permsDesdeFecha->map(fn($p) => ['id' => $p->id, 'name' => $p->name])->all();  
-        $views = $views->map(function ($view) use (
-            $revokedViewPermissions,
-            $basePermsArray,
-            $permIdsFromUserRoles
-        ) {
-            
-            $revokedForThisView = $revokedViewPermissions->get($view->url, []) ?? [];
-            $revokedForThisView = array_map('intval', $revokedForThisView); // normaliza
+        $views = $views->map(function ($view) use ($revokedViewMap, $basePermsArray, $assignedIds, $revokedGlobalIds) {
 
-            // Si tienes revocados globales, súmalos aquí (opcional):
-            // $idsMarcadosRevoked = array_unique(array_merge($revokedForThisView, $permIdsCustomRevocadosGlobal));
-            $idsMarcadosRevoked = $revokedForThisView;
+            // OJO: usa exactamente lo que guardas en BD (dijiste que es la URL con slash)
+            $revokedForThisView = $revokedViewMap->get($view->url, []) ?? [];
 
-            $permissions = array_map(function ($perm) use ($idsMarcadosRevoked) {
-                $isRevoked = in_array((int)$perm['id'], $idsMarcadosRevoked, true);
+            $permissions = array_map(function ($perm) use ($assignedIds, $revokedGlobalIds, $revokedForThisView) {
+                // enabled efectivo para la vista:
+                // asignado  Y  no revocado global  Y  no revocado en esta vista
+                $enabled = in_array((int)$perm['id'], $assignedIds, true)
+                    && !in_array((int)$perm['id'], $revokedGlobalIds, true)
+                    && !in_array((int)$perm['id'], $revokedForThisView, true);
+
                 return [
                     'id'      => $perm['id'],
                     'name'    => $perm['name'],
-                    'revoked' => !$isRevoked,
+                    'enabled' => $enabled,
+                    // si tu UI aún usa 'revoked' como "habilitado":
+                    'revoked' => $enabled,
                 ];
             }, $basePermsArray);
 
-            //dd($permissions);
-
             return [
                 'id'          => $view->id,
-                'name'        => $view->name,   // ej: "clientes.index"
-                'route'       => $view->url,    // si quieres exponer la ruta real
-                'module'      => $view->modulo, // normalizamos el nombre de la key
+                'name'        => $view->name,
+                'route'       => $view->url,    // en tu BD es URL
+                'module'      => $view->modulo,
                 'permissions' => $permissions,
             ];
         });
 
-        // 6) Agrupar por módulo (funciona con arrays)
         $groupedViews = $views->groupBy('module');
 
         return Inertia::render('Usuarios/Edit', [
-            'user' => $user,
-            'rol' => $rol,
-            'roles' => $roles,
-            'permisos' => $permisos,
-            'permisosAll' => $permisosAll,
+            'user'         => $user,
+            'rol'          => $rol,
+            'roles'        => $roles,
+            'permisos'     => $permisos,     // <- usa este para toggles generales
+            'permisosAll'  => $permisosAll,  // <- solo catálogo/listado
             'groupedViews' => $groupedViews,
         ]);
     }
+
 
     public function update(Request $request, User $user)
     {
@@ -131,7 +140,7 @@ class UsuariosController extends Controller
             'permissions.*.revoked' => 'boolean',
         ]);
         foreach ($validated['permissions'] as $perm) {
-            if ($perm['revoked']) {
+            if (!$perm['revoked']) {
                 // Si está revocado y no existe, lo creamos
                 UserRevokedPermission::firstOrCreate([
                     'user_id' => $user->id,

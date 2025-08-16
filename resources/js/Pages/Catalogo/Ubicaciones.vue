@@ -5,6 +5,7 @@ import { FilterMatchMode } from "@primevue/core/api";
 import { useToast } from "primevue";
 import { ref } from "vue";
 import { router as Inertia } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     locations: Array,
@@ -13,6 +14,8 @@ const props = defineProps({
 
 console.log("Ubicaciones props:", props.locations);
 console.log("Ubicaciones errors:", props.errors);
+
+const page = usePage();
 
 const selectedLocations = ref([]);
 const locationDialog = ref(false);
@@ -176,13 +179,20 @@ const error = (error) => {
 <template>
     <AppLayout :title="'Ubicaciones'">
         <div class="card dark:border-none">
-            <Toolbar class="mb-6">
+            <Toolbar
+                class="mb-6"
+                v-if="
+                    page.props.auth?.can.includes('create') ||
+                    page.props.auth?.can.includes('delete')
+                "
+            >
                 <template #start>
                     <Button
                         label="Añadir Ubicación"
                         icon="pi pi-plus"
                         class="mr-2"
                         @click="openNew"
+                        v-if="page.props.auth?.can.includes('create')"
                     />
                     <Button
                         label="Eliminar Seleccionados"
@@ -193,6 +203,7 @@ const error = (error) => {
                         :disabled="
                             !selectedLocations || !selectedLocations.length
                         "
+                        v-if="page.props.auth?.can.includes('delete')"
                     />
                 </template>
             </Toolbar>
@@ -280,6 +291,7 @@ const error = (error) => {
                             rounded
                             class="mr-2"
                             @click="editLocation(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('update')"
                         />
                         <Button
                             icon="pi pi-trash"
@@ -287,6 +299,7 @@ const error = (error) => {
                             rounded
                             severity="danger"
                             @click="confirmDeleteLocation(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('delete')"
                         />
                     </template>
                 </Column>

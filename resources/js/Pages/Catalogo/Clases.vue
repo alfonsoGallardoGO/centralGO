@@ -5,6 +5,7 @@ import { FilterMatchMode } from "@primevue/core/api";
 import { useToast } from "primevue";
 import { ref } from "vue";
 import { router as Inertia } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     clases: Array,
@@ -13,6 +14,8 @@ const props = defineProps({
 
 console.log("Clases props:", props.clases);
 console.log("Clases errors:", props.errors);
+
+const page = usePage();
 
 const selectedClases = ref([]);
 const claseDialog = ref(false);
@@ -175,13 +178,20 @@ const error = (error) => {
 <template>
     <AppLayout :title="'Clases Contables'">
         <div class="card dark:border-none">
-            <Toolbar class="mb-6">
+            <Toolbar
+                class="mb-6"
+                v-if="
+                    page.props.auth?.can.includes('create') &&
+                    page.props.auth?.can.includes('delete')
+                "
+            >
                 <template #start>
                     <Button
                         label="Añadir Clase"
                         icon="pi pi-plus"
                         class="mr-2"
                         @click="openNew"
+                        v-if="page.props.auth?.can.includes('create')"
                     />
                     <Button
                         label="Eliminar Seleccionados"
@@ -190,6 +200,7 @@ const error = (error) => {
                         variant="outlined"
                         @click="confirmDeleteClases"
                         :disabled="!selectedClases || !selectedClases.length"
+                        v-if="page.props.auth?.can.includes('delete')"
                     />
                 </template>
             </Toolbar>
@@ -256,6 +267,7 @@ const error = (error) => {
                             rounded
                             class="mr-2"
                             @click="editClase(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('update')"
                         />
                         <Button
                             icon="pi pi-trash"
@@ -263,6 +275,7 @@ const error = (error) => {
                             rounded
                             severity="danger"
                             @click="confirmDeleteClase(slotProps.data)"
+                            v-if="page.props.auth?.can.includes('delete')"
                         />
                     </template>
                 </Column>

@@ -138,6 +138,13 @@ createInertiaApp({
         app.component("Tabs", Tabs);
         app.component("TabList", TabList);
         app.component("Tab", Tab);
+
+        app.config.globalProperties.$can = (name) => {
+            const can =
+                app.config.globalProperties.$page?.props?.auth?.can ?? [];
+            return can.includes(name);
+        };
+
         app.mount(el);
 
         if (typeof KTApp !== "undefined" && KTApp.init) {
