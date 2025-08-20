@@ -53,6 +53,22 @@ const model = ref([
                         icon: "pi pi-desktop",
                         to: "/catalogo/portales",
                     },
+                    {
+                        label: "Proveedores",
+                        icon: "pi pi-truck",
+                        items: [
+                            {
+                                label: "Listado de Proveedores",
+                                icon: "pi pi-box",
+                                to: "/catalogo/proveedores",
+                            },
+                            {
+                                label: "Usuarios de Proveedores",
+                                icon: "pi pi-users",
+                                to: "/catalogo/usuarios-proveedores",
+                            },
+                        ],
+                    },
                 ],
             },
             {
@@ -88,6 +104,7 @@ const model = ref([
 
 // helper: ¿puede ver esa ruta?
 const canViews = computed(() => page.props.auth?.canViews ?? {});
+console.log(canViews);
 const canView = (to) => {
     if (!to) return true; // headers/grupos sin ruta
     const key = to.startsWith("/") ? to : `/${to}`;

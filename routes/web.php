@@ -10,6 +10,8 @@ use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SuplierUserController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\VistaController;
 use Illuminate\Foundation\Application;
@@ -75,6 +77,15 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::delete('catalogo/portales/{portal}', [PortalController::class, 'destroy'])->name('catalogo.portales.destroy');
     Route::post('catalogo/portales/multiple', [PortalController::class, 'destroyMultiple'])
     ->name('catalogo.portales.destroyMultiple');
+
+    Route::get('catalogo/proveedores', [SupplierController::class, 'index'])->name('/catalogo/proveedores');
+    Route::put('catalogo/proveedores/{supplier}', [SupplierController::class, 'update'])->name('catalogo.proveedores.update');
+
+    Route::get('catalogo/usuarios-proveedores', [SuplierUserController::class, 'index'])->name('/catalogo/usuarios-proveedores');
+    Route::post('/catalogo/usuarios-proveedores', [SuplierUserController::class, 'store'])->name('users.store');
+    Route::delete('/catalogo/usuarios-proveedores/{id}', [SuplierUserController::class, 'destroy'])->name('users.destroy');
+    Route::put('/catalogo/usuarios-proveedores/{id}/update', [SuplierUserController::class, 'update'])->name('users.update');
+    Route::delete('/catalogo/usuarios-proveedores', [SuplierUserController::class, 'destroySelected'])->name('users.destroySelected');
 
 });
 
